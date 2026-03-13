@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduLive — Admin Panel</title>
+  <link rel="stylesheet" href="main.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <style>
+    body { background: var(--bg); min-height: 100vh; }
+    .admin-wrap { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+    .admin-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; }
+    .admin-title  { font-family:'Clash Display',sans-serif; font-size:1.4rem; font-weight:700; }
+    .admin-sub    { font-size:0.82rem; color:var(--text2); margin-top:3px; }
+    .admin-back   { font-size:0.82rem; color:var(--sky); cursor:pointer; }
+    .admin-back:hover { text-decoration:underline; }
+
+    .section { background:var(--bg2); border:1px solid var(--border); border-radius:var(--r); margin-bottom:24px; overflow:hidden; }
+    .section-head { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+    .section-head h2 { font-family:'Clash Display',sans-serif; font-size:0.95rem; font-weight:600; }
+    .section-body { padding:20px; }
+
+    .step-num { display:inline-flex; align-items:center; justify-content:center; width:24px; height:24px; border-radius:50%; background:var(--sky); color:#fff; font-size:0.7rem; font-weight:800; margin-right:8px; flex-shrink:0; }
+
+    .student-row { display:grid; grid-template-columns:1fr 1fr auto; gap:10px; margin-bottom:10px; align-items:center; }
+    .student-row input { background:var(--bg3); border:1.5px solid var(--border); border-radius:var(--r-sm); padding:9px 12px; color:var(--text); font-size:0.85rem; outline:none; transition:border-color var(--t); }
+    .student-row input:focus { border-color:var(--sky); }
+
+    .btn-add-row { background:none; border:1px dashed var(--border); border-radius:var(--r-sm); padding:9px; color:var(--text2); cursor:pointer; font-size:0.82rem; transition:var(--t); }
+    .btn-add-row:hover { border-color:var(--sky); color:var(--sky); }
+    .btn-remove-row { background:var(--coral-dim); border:none; border-radius:6px; padding:6px 10px; color:var(--coral); cursor:pointer; font-size:0.8rem; transition:var(--t); }
+    .btn-remove-row:hover { background:rgba(244,63,94,0.25); }
+
+    .result-table { width:100%; border-collapse:collapse; }
+    .result-table th { padding:10px 14px; text-align:left; font-size:0.68rem; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.8px; background:var(--bg3); border-bottom:1px solid var(--border); }
+    .result-table td { padding:10px 14px; font-size:0.82rem; border-bottom:1px solid var(--border2); }
+    .result-table tr:last-child td { border:none; }
+    .id-cell   { font-family:monospace; color:var(--sky); }
+    .pass-cell { font-family:monospace; color:var(--amber); }
+
+    .alert { padding:12px 16px; border-radius:var(--r-sm); font-size:0.84rem; margin-bottom:16px; display:none; }
+    .alert.show { display:block; }
+    .alert-success { background:var(--jade-dim); border:1px solid rgba(6,214,160,0.25); color:var(--jade); }
+    .alert-error   { background:var(--coral-dim); border:1px solid rgba(244,63,94,0.25); color:var(--coral); }
+    .alert-info    { background:var(--sky-dim);   border:1px solid rgba(59,130,246,0.25);  color:var(--sky); }
+
+    .copy-btn { background:var(--bg3); border:1px solid var(--border); border-radius:5px; padding:3px 8px; font-size:0.7rem; color:var(--text2); cursor:pointer; transition:var(--t); }
+    .copy-btn:hover { border-color:var(--sky); color:var(--sky); }
+
+    .progress-outer { height:6px; background:var(--bg4); border-radius:3px; overflow:hidden; margin-top:8px; }
+    .progress-inner { height:100%; background:var(--jade); border-radius:3px; transition:width 0.4s; }
+
+    .checklist-item { display:flex; align-items:center; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:0.84rem; }
+    .checklist-item:last-child { border:none; }
+    .check-icon { font-size:1rem; flex-shrink:0; }
+    .check-step { flex:1; }
+    .check-link { color:var(--sky); font-size:0.78rem; cursor:pointer; }
+    .check-link:hover { text-decoration:underline; }
+  </style>
+</head>
+<body>
+
+<div class="admin-wrap">
+
+  <div class="admin-header">
+    <div>
+      <div class="admin-title">🛠 EduLive Admin Panel</div>
+      <div class="admin-sub">Set up your platform · Add students · Configure Supabase</div>
+    </div>
+    <div>
+      <a href="index.html" class="admin-back">← Teacher Dashboard</a>
+    </div>
+  </div>
+
+  <!-- ── STEP 1: Supabase setup ── -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="step-num">1</span> Supabase Setup Checklist</h2>
+      <span id="supabaseStatus" style="font-size:0.78rem;color:var(--text2)">Checking…</span>
+    </div>
+    <div class="section-body">
+      <div class="checklist-item">
+        <div class="check-icon" id="chk1">⬜</div>
+        <div class="check-step">
+          <div style="font-weight:600">Create Supabase account & project</div>
+          <div style="font-size:0.75rem;color:var(--text2)">Go to supabase.com → New Project → name it "edulive"</div>
+        </div>
+        <a href="https://supabase.com" target="_blank" class="check-link">Open →</a>
+      </div>
+      <div class="checklist-item">
+        <div class="check-icon" id="chk2">⬜</div>
+        <div class="check-step">
+          <div style="font-weight:600">Paste your keys in config.js</div>
+          <div style="font-size:0.75rem;color:var(--text2)">Settings → API → copy Project URL and anon key</div>
+        </div>
+        <span class="check-link" onclick="document.getElementById('configHelp').classList.toggle('show')">How? →</span>
+      </div>
+      <div class="alert alert-info" id="configHelp">
+        Open <strong>config.js</strong> in any text editor. Replace:<br>
+        <code>PASTE_YOUR_PROJECT_URL_HERE</code> → your Supabase Project URL<br>
+        <code>PASTE_YOUR_ANON_KEY_HERE</code> → your anon public key<br>
+        Save the file and refresh this page.
+      </div>
+      <div class="checklist-item">
+        <div class="check-icon" id="chk3">⬜</div>
+        <div class="check-step">
+          <div style="font-weight:600">Run the database schema SQL</div>
+          <div style="font-size:0.75rem;color:var(--text2)">In Supabase → SQL Editor → New Query → paste schema.sql → Run</div>
+        </div>
+        <span class="check-link" onclick="copySchema()">Copy SQL →</span>
+      </div>
+      <div class="checklist-item">
+        <div class="check-icon" id="chk4">⬜</div>
+        <div class="check-step">
+          <div style="font-weight:600">Create your teacher account below</div>
+          <div style="font-size:0.75rem;color:var(--text2)">Step 2 on this page</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Teacher account ── -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="step-num">2</span> Create Your Teacher Account</h2>
+    </div>
+    <div class="section-body">
+      <div class="alert alert-success" id="teacherAlert"></div>
+      <div class="alert alert-error"   id="teacherError"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div class="field"><label>Your Full Name</label><input type="text" id="teacherName" placeholder="e.g. Rajesh Kumar"></div>
+        <div class="field"><label>Teacher ID</label><input type="text" id="teacherId" placeholder="e.g. TCH-001" value="TCH-001"></div>
+      </div>
+      <div class="field"><label>Password (you'll use this to log in)</label><input type="password" id="teacherPw" placeholder="Choose a strong password" autocomplete="new-password"></div>
+      <button class="btn btn-primary" onclick="createTeacherAccount()" id="createTeacherBtn">Create Teacher Account →</button>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Add students ── -->
+  <div class="section">
+    <div class="section-head">
+      <h2><span class="step-num">3</span> Add Your Students</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="addStudentRow()">+ Add Row</button>
+        <button class="btn btn-jade" id="createStudentsBtn" onclick="createAllStudents()">Create All Accounts →</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="alert alert-info" style="display:block;margin-bottom:16px">
+        Fill in student names. Student IDs and passwords will be <strong>auto-generated</strong>. You'll get a table to share with students after creating accounts.
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:10px;margin-bottom:8px;padding:0 0 6px">
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px">Student Full Name</div>
+        <div style="font-size:0.68rem;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.6px">Subjects (comma separated)</div>
+        <div></div>
+      </div>
+      <div id="studentRows"></div>
+      <button class="btn-add-row" onclick="addStudentRow()" style="width:100%;margin-top:8px">+ Add another student</button>
+
+      <div id="progressWrap" style="display:none;margin-top:16px">
+        <div style="font-size:0.8rem;color:var(--text2)" id="progressLabel">Creating accounts…</div>
+        <div class="progress-outer"><div class="progress-inner" id="progressBar" style="width:0%"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STEP 4: Credentials output ── -->
+  <div class="section" id="credSection" style="display:none">
+    <div class="section-head">
+      <h2><span class="step-num">4</span> Student Login Credentials</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost btn-sm" onclick="copyAllCredentials()">📋 Copy All</button>
+        <button class="btn btn-primary btn-sm" onclick="printCredentials()">🖨 Print / Save PDF</button>
+      </div>
+    </div>
+    <div class="section-body">
+      <div class="alert alert-success" style="display:block;margin-bottom:16px" id="credAlert">
+        ✅ All accounts created! Share this table with your students via WhatsApp or print it.
+      </div>
+      <table class="result-table" id="credTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student Name</th>
+            <th>Student ID</th>
+            <th>Password</th>
+            <th>Login URL</th>
+          </tr>
+        </thead>
+        <tbody id="credTbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── Existing students ── -->
+  <div class="section">
+    <div class="section-head">
+      <h2>👥 Existing Students</h2>
+      <button class="btn btn-ghost btn-sm" onclick="loadExistingStudents()">🔄 Refresh</button>
+    </div>
+    <div class="section-body" id="existingStudentsWrap">
+      <div style="text-align:center;color:var(--text3);font-size:0.84rem;padding:20px">Click Refresh to load existing students.</div>
+    </div>
+  </div>
+
+</div><!-- /admin-wrap -->
+
+<script>
+const FONT_CDN = 'https://fonts.googleapis.com/css2?family=Clash+Display:wght@500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap';
+const linkEl = document.createElement('link'); linkEl.rel='stylesheet'; linkEl.href=FONT_CDN; document.head.appendChild(linkEl);
+
+/* ── Check connection ── */
+async function checkSupabaseConnection() {
+  const statusEl = document.getElementById('supabaseStatus');
+  try {
+    const { error } = await db.from('profiles').select('id').limit(1);
+    if (error) throw error;
+    statusEl.textContent = '✅ Connected';
+    statusEl.style.color = 'var(--jade)';
+    document.getElementById('chk1').textContent = '✅';
+    document.getElementById('chk2').textContent = '✅';
+    document.getElementById('chk3').textContent = '✅';
+  } catch (e) {
+    if (e.message?.includes('relation') || e.message?.includes('does not exist')) {
+      statusEl.textContent = '⚠️ Keys OK, but run schema.sql first';
+      statusEl.style.color = 'var(--amber)';
+      document.getElementById('chk2').textContent = '✅';
+    } else {
+      statusEl.textContent = '❌ Not connected — check config.js';
+      statusEl.style.color = 'var(--coral)';
+    }
+  }
+}
+
+/* ── Copy schema ── */
+async function copySchema() {
+  try {
+    const res = await fetch('schema.sql');
+    const sql = await res.text();
+    await navigator.clipboard.writeText(sql);
+    alert('✅ SQL copied to clipboard!\n\nNow paste it in Supabase → SQL Editor → New Query → Run All');
+  } catch (e) {
+    alert('Could not copy automatically. Please open schema.sql and copy it manually.');
+  }
+}
+
+/* ── Teacher account ── */
+async function createTeacherAccount() {
+  const name  = document.getElementById('teacherName')?.value?.trim();
+  const tid   = document.getElementById('teacherId')?.value?.trim().toUpperCase();
+  const pw    = document.getElementById('teacherPw')?.value;
+  const btn   = document.getElementById('createTeacherBtn');
+  const ok    = document.getElementById('teacherAlert');
+  const err   = document.getElementById('teacherError');
+
+  ok.style.display = 'none'; err.style.display = 'none';
+  if (!name || !pw) { err.textContent = 'Please enter your name and password.'; err.style.display = 'block'; return; }
+  if (pw.length < 8) { err.textContent = 'Password must be at least 8 characters.'; err.style.display = 'block'; return; }
+
+  btn.textContent = 'Creating…'; btn.disabled = true;
+  try {
+    const email = tid.toLowerCase() + '@edulive.app';
+    const { data, error } = await db.auth.signUp({
+      email, password: pw,
+      options: { data: { full_name: name, student_id: tid, role: 'teacher' } }
+    });
+    if (error) throw error;
+    /* Update profile role to teacher */
+    if (data.user) {
+      await db.from('profiles').update({ role:'teacher', full_name:name, student_id:tid }).eq('id', data.user.id);
+    }
+    ok.textContent = `✅ Teacher account created! Login at index.html with ID: ${tid} and your password.`;
+    ok.style.display = 'block';
+    document.getElementById('chk4').textContent = '✅';
+    btn.textContent = '✓ Created';
+  } catch (e) {
+    err.textContent = 'Error: ' + e.message;
+    err.style.display = 'block';
+    btn.textContent = 'Create Teacher Account →'; btn.disabled = false;
+  }
+}
+
+/* ── Student rows ── */
+let rowCount = 0;
+function addStudentRow(name='', subjects='') {
+  rowCount++;
+  const div = document.createElement('div');
+  div.className = 'student-row';
+  div.id = 'srow-' + rowCount;
+  div.innerHTML = `
+    <input type="text" placeholder="e.g. Aarav Agarwal" value="${name}" class="sname-inp">
+    <input type="text" placeholder="e.g. Math, Physics" value="${subjects}" class="ssubj-inp">
+    <button class="btn-remove-row" onclick="document.getElementById('srow-${rowCount}').remove()">✕</button>`;
+  document.getElementById('studentRows').appendChild(div);
+}
+
+/* Pre-fill 5 empty rows */
+for (let i = 0; i < 5; i++) addStudentRow();
+
+/* ── Create all student accounts ── */
+async function createAllStudents() {
+  const rows = document.querySelectorAll('.student-row');
+  const students = [...rows].map(r => ({
+    name: r.querySelector('.sname-inp')?.value?.trim(),
+    subjects: r.querySelector('.ssubj-inp')?.value?.trim(),
+  })).filter(s => s.name);
+
+  if (!students.length) { alert('Please enter at least one student name.'); return; }
+
+  const btn = document.getElementById('createStudentsBtn');
+  btn.textContent = 'Creating…'; btn.disabled = true;
+
+  const progress = document.getElementById('progressWrap');
+  const bar      = document.getElementById('progressBar');
+  const label    = document.getElementById('progressLabel');
+  progress.style.display = 'block';
+
+  const created = [];
+  const failed  = [];
+
+  for (let i = 0; i < students.length; i++) {
+    const s = students[i];
+    const idx = String(i + 1).padStart(3, '0');
+    const year = new Date().getFullYear();
+    const studentId = `STU-${year}-${idx}`;
+    const password  = 'edu' + Math.random().toString(36).slice(2, 7);
+    const email     = studentId.toLowerCase() + '@edulive.app';
+    const subjArray = s.subjects ? s.subjects.split(',').map(x => x.trim()).filter(Boolean) : [];
+
+    label.textContent = `Creating ${i+1}/${students.length}: ${s.name}…`;
+    bar.style.width   = Math.round((i+1)/students.length*100) + '%';
+
+    try {
+      const { data, error } = await db.auth.signUp({
+        email,
+        password,
+        options: { data: { full_name: s.name, student_id: studentId, role: 'student' } }
+      });
+      if (error) throw error;
+      if (data.user) {
+        await db.from('profiles').update({
+          full_name: s.name, student_id: studentId, role: 'student', subjects: subjArray
+        }).eq('id', data.user.id);
+      }
+      created.push({ name: s.name, id: studentId, pw: password });
+    } catch (e) {
+      failed.push({ name: s.name, error: e.message });
+    }
+
+    /* Small delay to avoid rate limiting */
+    await new Promise(r => setTimeout(r, 350));
+  }
+
+  label.textContent = `✅ Done! ${created.length} created, ${failed.length} failed.`;
+  bar.style.background = created.length > 0 ? 'var(--jade)' : 'var(--coral)';
+
+  showCredentials(created);
+  btn.textContent = '✓ Done'; 
+  if (failed.length) {
+    alert(`⚠️ ${failed.length} account(s) failed to create:\n${failed.map(f => f.name + ': ' + f.error).join('\n')}`);
+  }
+}
+
+/* ── Show credentials table ── */
+function showCredentials(students) {
+  const section = document.getElementById('credSection');
+  const tbody   = document.getElementById('credTbody');
+  section.style.display = 'block';
+  const loginUrl = window.location.origin + window.location.pathname.replace('admin.html','student.html');
+  tbody.innerHTML = students.map((s, i) => `
+    <tr>
+      <td style="color:var(--text3)">${i+1}</td>
+      <td style="font-weight:500">${s.name}</td>
+      <td class="id-cell">${s.id}</td>
+      <td class="pass-cell">${s.pw}</td>
+      <td style="font-size:0.75rem;color:var(--text2)">${loginUrl}</td>
+    </tr>`).join('');
+  section.scrollIntoView({ behavior:'smooth' });
+}
+
+function copyAllCredentials() {
+  const rows = document.querySelectorAll('#credTbody tr');
+  const lines = ['Student Name\tStudent ID\tPassword', ...[...rows].map(r => {
+    const cells = r.querySelectorAll('td');
+    return `${cells[1]?.textContent}\t${cells[2]?.textContent}\t${cells[3]?.textContent}`;
+  })];
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(() => alert('✅ Credentials copied! Paste into WhatsApp, Excel, or Google Sheets.'))
+    .catch(() => alert('Could not copy automatically. Please select and copy the table manually.'));
+}
+
+function printCredentials() { window.print(); }
+
+/* ── Load existing students ── */
+async function loadExistingStudents() {
+  const wrap = document.getElementById('existingStudentsWrap');
+  wrap.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.84rem;padding:20px">Loading…</div>';
+  try {
+    const { data: students } = await db.from('profiles').select('*').eq('role','student').order('full_name');
+    if (!students?.length) {
+      wrap.innerHTML = '<div style="text-align:center;color:var(--text3);font-size:0.84rem;padding:20px">No students yet. Add them above.</div>';
+      return;
+    }
+    wrap.innerHTML = `<table class="result-table">
+      <thead><tr><th>#</th><th>Name</th><th>Student ID</th><th>Subjects</th><th>Batch</th><th>Action</th></tr></thead>
+      <tbody>${students.map((s,i) => `<tr>
+        <td style="color:var(--text3)">${i+1}</td>
+        <td style="font-weight:500">${s.full_name}</td>
+        <td class="id-cell">${s.student_id}</td>
+        <td style="font-size:0.78rem;color:var(--text2)">${(s.subjects||[]).join(', ')||'—'}</td>
+        <td style="font-size:0.78rem;color:var(--text2)">${s.batch||'—'}</td>
+        <td><button class="btn-remove-row" onclick="deleteStudent('${s.id}','${s.full_name}')">Remove</button></td>
+      </tr>`).join('')}</tbody>
+    </table>`;
+  } catch (e) {
+    wrap.innerHTML = `<div style="text-align:center;color:var(--coral);font-size:0.84rem;padding:20px">Error: ${e.message}</div>`;
+  }
+}
+
+async function deleteStudent(userId, name) {
+  if (!confirm(`Remove ${name} from the platform?\n\nThis deletes their account and all their data.`)) return;
+  try {
+    /* Supabase admin delete requires service key — for now just remove profile */
+    await db.from('profiles').delete().eq('id', userId);
+    loadExistingStudents();
+  } catch (e) { alert('Could not delete: ' + e.message); }
+}
+
+/* ── Init ── */
+document.addEventListener('DOMContentLoaded', checkSupabaseConnection);
+</script>
+</body>
+</html>

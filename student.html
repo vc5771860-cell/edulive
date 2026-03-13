@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduLive — Student Portal</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="student.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN
+═══════════════════════════════════════ -->
+<div id="loginScreen" class="login-screen">
+
+  <!-- Left hero -->
+  <div class="login-hero">
+    <div class="hero-brand">Edu<span>Live</span></div>
+    <div class="hero-year">Student Portal · Academic Year 2025–26</div>
+    <div class="hero-quote">
+      Every class, every quiz, every moment —
+      <strong>your learning, all in one place.</strong>
+    </div>
+    <div class="hero-stats">
+      <div>
+        <div class="hstat-n">30</div>
+        <div class="hstat-l">Students</div>
+      </div>
+      <div>
+        <div class="hstat-n">4</div>
+        <div class="hstat-l">Subjects</div>
+      </div>
+      <div>
+        <div class="hstat-n">Live</div>
+        <div class="hstat-l">Classes</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right form panel -->
+  <div class="login-form-panel">
+
+    <div class="login-toggle">
+      <button class="login-toggle-btn active" onclick="switchLoginMode('login', this)">🔐 Student Login</button>
+      <button class="login-toggle-btn" onclick="switchLoginMode('join', this)">🔗 Join with Link</button>
+    </div>
+
+    <!-- Login form -->
+    <div id="loginFormWrap">
+      <div class="login-title">Welcome back</div>
+      <div class="login-sub">Sign in with your Student ID and password</div>
+
+      <div class="err-banner" id="loginError">⚠ Incorrect Student ID or password. Please try again.</div>
+
+      <div class="field">
+        <label>Student ID</label>
+        <div class="field-icon-wrap">
+          <span class="field-icon">🎓</span>
+          <input type="text" id="studentIdInput" placeholder="e.g. STU-2025-001" autocomplete="username">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Password</label>
+        <div class="field-icon-wrap" style="position:relative">
+          <span class="field-icon">🔑</span>
+          <input type="password" id="pwInput" placeholder="Enter your password" autocomplete="current-password" onkeydown="loginEnterKey(event)">
+          <button class="pw-toggle" id="eyeBtn" onclick="togglePassword()">👁</button>
+        </div>
+      </div>
+
+      <button class="btn-login-main" id="loginSubmitBtn" onclick="doLogin()">Sign In →</button>
+
+      <div class="or-divider">
+        <div class="or-line"></div>
+        <div class="or-text">or join directly</div>
+        <div class="or-line"></div>
+      </div>
+
+      <button class="btn-room-code" onclick="toggleRoomPanel()">🔗 Join with a Room Code</button>
+
+      <div class="room-code-panel" id="roomCodePanel">
+        <div style="font-size:0.78rem;font-weight:600;color:#6b5f55">Enter the code shared by your teacher:</div>
+        <div class="room-code-row">
+          <input class="room-code-inp" id="roomCodeInput" placeholder="e.g. MATH-4X9K" maxlength="10">
+          <button class="btn-go" onclick="joinWithCode('panel')">Join →</button>
+        </div>
+      </div>
+
+      <!-- Demo accounts -->
+      <div class="demo-box">
+        <div class="demo-box-title">🧪 Demo — click any ID to autofill</div>
+        <div class="demo-row">
+          <span class="demo-id" onclick="autofillDemo('STU-2025-001','pass123')">STU-2025-001</span>
+          <span style="color:#6b5f55">Aarav Agarwal</span>
+          <span class="demo-pw">pass123</span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-id" onclick="autofillDemo('STU-2025-004','pass123')">STU-2025-004</span>
+          <span style="color:#6b5f55">Sara Joshi</span>
+          <span class="demo-pw">pass123</span>
+        </div>
+        <div class="demo-row">
+          <span class="demo-id" onclick="autofillDemo('STU-2025-014','pass123')">STU-2025-014</span>
+          <span style="color:#6b5f55">Tanvi Mishra</span>
+          <span class="demo-pw">pass123</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guest / join-with-link form -->
+    <div id="joinFormWrap" style="display:none">
+      <div class="login-title">Join a Class</div>
+      <div class="login-sub">Enter the room code your teacher shared with you</div>
+
+      <div class="field">
+        <label>Room Code</label>
+        <div class="field-icon-wrap">
+          <span class="field-icon">🔗</span>
+          <input type="text" id="guestCodeInput" placeholder="e.g. MATH-4X9K" style="text-transform:uppercase;letter-spacing:2px;font-weight:700" maxlength="10">
+        </div>
+      </div>
+      <div class="field">
+        <label>Your Full Name</label>
+        <div class="field-icon-wrap">
+          <span class="field-icon">👤</span>
+          <input type="text" id="guestNameInput" placeholder="Enter your full name">
+        </div>
+      </div>
+      <button class="btn-login-main" onclick="joinAsGuest()">Join Class →</button>
+
+      <div class="or-divider"><div class="or-line"></div><div class="or-text">have an account?</div><div class="or-line"></div></div>
+      <button class="btn-room-code" onclick="switchLoginMode('login', document.querySelector('.login-toggle-btn'))">← Back to Student Login</button>
+    </div>
+
+  </div><!-- /login-form-panel -->
+</div><!-- /loginScreen -->
+
+
+<!-- ═══════════════════════════════════════
+     STUDENT DASHBOARD
+═══════════════════════════════════════ -->
+<div id="studentDash" class="student-dash">
+
+  <!-- Navbar -->
+  <nav class="s-navbar">
+    <div class="s-brand">Edu<span>Live</span></div>
+    <div class="s-nav-links">
+      <button class="s-nav-btn active" onclick="showSection('home', this)">🏠 Home</button>
+      <button class="s-nav-btn" onclick="showSection('classes', this)">📡 Classes</button>
+      <button class="s-nav-btn" onclick="showSection('assignments', this)">📋 Assignments</button>
+      <button class="s-nav-btn" onclick="showSection('quizzes', this)">🧠 Quizzes</button>
+      <button class="s-nav-btn" onclick="showSection('attendance', this)">✅ Attendance</button>
+      <button class="s-nav-btn" onclick="showSection('profile', this)">👤 Profile</button>
+    </div>
+    <div class="s-nav-right">
+      <div class="notif-wrap">
+        <button class="notif-btn-s">🔔</button>
+        <div class="notif-dot"></div>
+      </div>
+      <div class="student-pill" onclick="showSection('profile', null)">
+        <div class="s-orb" id="navOrbEl">AA</div>
+        <span class="s-name" id="navNameEl">Student</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="s-content">
+
+    <!-- HOME -->
+    <div class="s-section active" id="sec-home">
+      <!-- Live class banner -->
+      <div class="live-banner">
+        <div class="live-pulse-wrap">📡</div>
+        <div class="live-info">
+          <div class="live-chip"><div class="live-chip-dot"></div> LIVE NOW</div>
+          <div class="live-class-name">Calculus — Derivatives</div>
+          <div class="live-class-meta">📐 Mathematics · Teacher · Started 4 mins ago · 27 students joined</div>
+        </div>
+        <button class="btn-join-now" onclick="openJoinModal()">Join Now →</button>
+      </div>
+
+      <div class="s-stat-row">
+        <div class="s-stat-box">
+          <div class="s-stat-lbl">Attendance</div>
+          <div class="s-stat-val" id="homeAttVal" style="color:#0d7377">–</div>
+          <div class="s-stat-sub">Overall this term</div>
+        </div>
+        <div class="s-stat-box">
+          <div class="s-stat-lbl">Quizzes Done</div>
+          <div class="s-stat-val" style="color:#c17f24">7</div>
+          <div class="s-stat-sub">Avg score 74%</div>
+        </div>
+        <div class="s-stat-box">
+          <div class="s-stat-lbl">Pending Assignments</div>
+          <div class="s-stat-val" style="color:#c0392b">2</div>
+          <div class="s-stat-sub">Due this week</div>
+        </div>
+        <div class="s-stat-box">
+          <div class="s-stat-lbl">Classes Attended</div>
+          <div class="s-stat-val" style="color:#2d6a4f">11</div>
+          <div class="s-stat-sub">Out of 14 scheduled</div>
+        </div>
+      </div>
+
+      <div class="s-sec-header">
+        <div class="s-sec-title">Upcoming Classes</div>
+        <div class="s-sec-link" onclick="showSection('classes', null)">See all →</div>
+      </div>
+      <div class="grid-3 mb-lg" id="homeClassCards"></div>
+
+      <div class="s-sec-header">
+        <div class="s-sec-title">Pending Assignments</div>
+        <div class="s-sec-link" onclick="showSection('assignments', null)">See all →</div>
+      </div>
+      <div id="homeAssignList"></div>
+    </div>
+
+    <!-- CLASSES -->
+    <div class="s-section" id="sec-classes">
+      <div class="s-sec-header mb">
+        <div class="s-sec-title">All Classes</div>
+      </div>
+      <div class="join-code-bar">
+        <div class="jcb-icon">🔗</div>
+        <div class="jcb-info">
+          <div class="jcb-title">Join with a Room Code</div>
+          <div class="jcb-sub">Your teacher shares a unique code when class is live</div>
+        </div>
+        <input class="jcb-input" id="inlineRoomCode" placeholder="MATH-4X9K">
+        <button class="btn-submit-s" onclick="joinWithCode('inline')">Join</button>
+      </div>
+      <div class="grid-3" id="allClassCards"></div>
+    </div>
+
+    <!-- ASSIGNMENTS -->
+    <div class="s-section" id="sec-assignments">
+      <div class="s-sec-header mb">
+        <div class="s-sec-title">All Assignments</div>
+      </div>
+      <div id="allAssignList"></div>
+    </div>
+
+    <!-- QUIZZES -->
+    <div class="s-section" id="sec-quizzes">
+      <div class="s-sec-header mb">
+        <div class="s-sec-title">Quizzes &amp; Results</div>
+      </div>
+      <div id="studentQuizList"></div>
+    </div>
+
+    <!-- ATTENDANCE -->
+    <div class="s-section" id="sec-attendance">
+      <div class="s-sec-header mb">
+        <div class="s-sec-title">My Attendance</div>
+      </div>
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:16px">
+        <div class="att-big-card">
+          <div class="att-pct-num" id="attPctDisplay">–</div>
+          <div class="att-pct-lbl">Overall attendance this term</div>
+          <div class="att-bar-wrap"><div class="att-bar-inner" id="attBarInner" style="width:0%"></div></div>
+          <div class="att-counts">
+            <div class="att-count-box">
+              <div class="att-count-n" id="attPresentCount" style="color:#0d7377">–</div>
+              <div class="att-count-l">Present</div>
+            </div>
+            <div class="att-count-box">
+              <div class="att-count-n" id="attAbsentCount" style="color:#c0392b">–</div>
+              <div class="att-count-l">Absent</div>
+            </div>
+          </div>
+          <div style="font-size:0.7rem;font-weight:700;color:#9c8e82;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Subject-wise</div>
+          <div id="attSubjectBars"></div>
+        </div>
+        <div>
+          <div class="att-cal-label">Calendar — March 2026</div>
+          <div class="att-cal-grid" id="attCalGrid"></div>
+          <div class="att-legend">
+            <span><span class="att-legend-dot" style="background:#0d7377"></span>Present</span>
+            <span><span class="att-legend-dot" style="background:#e4dccb"></span>Absent</span>
+            <span><span class="att-legend-dot" style="background:#c17f24"></span>Today</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div class="s-section" id="sec-profile">
+      <div class="s-profile-card">
+        <div class="s-profile-cover"></div>
+        <div class="s-profile-body">
+          <div class="s-profile-orb" id="profileOrbEl">AA</div>
+          <div class="s-profile-name" id="profileNameEl">Student Name</div>
+          <div class="s-profile-id"   id="profileIdEl">ID: STU-2025-001</div>
+          <div class="s-profile-grid">
+            <div class="s-profile-field"><div class="spf-label">Subjects</div><div class="spf-val">Mathematics, Physics</div></div>
+            <div class="s-profile-field"><div class="spf-label">Batch</div><div class="spf-val">2025–26 Batch A</div></div>
+            <div class="s-profile-field"><div class="spf-label">Enrolled On</div><div class="spf-val">Jan 15, 2026</div></div>
+            <div class="s-profile-field"><div class="spf-label">Total Classes</div><div class="spf-val">50 scheduled</div></div>
+          </div>
+          <div style="margin-top:16px;display:flex;gap:10px">
+            <button class="btn-submit-s" style="flex:1">✏️ Edit Profile</button>
+            <button class="btn-view-s" onclick="logout()">🚪 Log Out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /s-content -->
+</div><!-- /studentDash -->
+
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- Join class modal -->
+<div class="s-modal-bg" id="joinClassModal">
+  <div class="s-modal">
+    <div class="s-modal-head">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div class="s-modal-title">Join: Calculus — Derivatives</div>
+          <div class="s-modal-sub">📐 Mathematics · Live now · 27 students in class</div>
+        </div>
+        <button onclick="closeJoinModal()" style="background:none;border:none;font-size:1.1rem;cursor:pointer;color:#6b5f55">✕</button>
+      </div>
+    </div>
+    <div class="s-video-area" id="studentVideoPreview">
+      <div class="vp-holder"><div>📷</div><p>Camera preview will appear here</p></div>
+      <div class="vp-ctrl-bar">
+        <button class="vp-btn" id="sMicBtn" onclick="toggleStudentMic()">🎤</button>
+        <button class="vp-btn" id="sCamBtn" onclick="toggleStudentCam()">📷</button>
+      </div>
+    </div>
+    <div class="s-modal-foot">
+      <button class="btn-view-s" onclick="closeJoinModal()">Cancel</button>
+      <button class="btn-submit-s" style="flex:1;padding:12px;font-size:0.92rem" onclick="joinClassNow()">📡 Join Class Now</button>
+    </div>
+  </div>
+</div>
+
+<!-- Live quiz modal -->
+<div class="s-modal-bg" id="studentQuizModal">
+  <div class="sq-modal" id="studentQuizBox"></div>
+</div>
+
+<!-- Scripts — order matters: supabase → config → quiz → auth -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="quiz.js"></script>
+<script src="auth.js"></script>
+
+</body>
+</html>
