@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduLive — Teacher Dashboard</title>
+  <link rel="stylesheet" href="main.css">
+  <link rel="stylesheet" href="teacher.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- ═══════════ SIDEBAR ═══════════ -->
+  <nav class="sidebar">
+    <div class="logo-mark">EL</div>
+
+    <button class="nav-btn active" id="nb-dash" onclick="showPage('dash')">
+      ⚡<span class="tooltip">Dashboard</span>
+    </button>
+    <button class="nav-btn" id="nb-live" onclick="showPage('live')">
+      📡<span class="tooltip">Live Class</span>
+    </button>
+    <button class="nav-btn" id="nb-quiz" onclick="showPage('quiz')">
+      🧠<span class="tooltip">Quizzes</span>
+    </button>
+    <button class="nav-btn" id="nb-att" onclick="showPage('att')">
+      ✅<span class="tooltip">Attendance</span>
+    </button>
+    <button class="nav-btn" id="nb-students" onclick="showPage('students')">
+      👥<span class="tooltip">Students</span>
+    </button>
+
+    <div class="nav-sep"></div>
+
+    <button class="nav-btn" onclick="openModal('schedModal')">
+      📅<span class="tooltip">Schedule Class</span>
+    </button>
+    <button class="nav-btn">
+      📁<span class="tooltip">Materials</span>
+    </button>
+    <button class="nav-btn">
+      📊<span class="tooltip">Reports</span>
+    </button>
+
+    <div class="sidebar-bottom">
+      <button class="nav-btn">⚙️<span class="tooltip">Settings</span></button>
+      <div class="user-orb" title="Teacher account">TK</div>
+    </div>
+  </nav>
+
+  <!-- ═══════════ MAIN ═══════════ -->
+  <div class="main-wrap">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-title" id="pageTitle">Dashboard</div>
+      <div class="topbar-spacer"></div>
+      <div id="liveTopChip" class="live-badge" style="display:none">
+        <div class="live-dot"></div>
+        LIVE · <span id="liveTimerDisplay">00:00</span>
+      </div>
+      <div class="subject-filters">
+        <div class="subj-chip active" onclick="filterSubject(this)">All</div>
+        <div class="subj-chip" onclick="filterSubject(this)">📐 Maths</div>
+        <div class="subj-chip" onclick="filterSubject(this)">🔬 Physics</div>
+        <div class="subj-chip" onclick="filterSubject(this)">📖 English</div>
+        <div class="subj-chip" onclick="filterSubject(this)">🧪 Science</div>
+      </div>
+      <button class="btn btn-primary" onclick="openModal('schedModal')">+ Schedule</button>
+    </div>
+
+    <!-- Content -->
+    <div class="content-area">
+
+      <!-- ══ DASHBOARD ══ -->
+      <div class="page active" id="page-dash">
+        <div class="page-scroll">
+
+          <div class="grid-4 mb-lg">
+            <div class="stat-tile sky">
+              <div class="stat-label">Students</div>
+              <div class="stat-value text-sky">30</div>
+              <div class="stat-note">Across all subjects</div>
+            </div>
+            <div class="stat-tile jade">
+              <div class="stat-label">Avg Attendance</div>
+              <div class="stat-value text-jade">87%</div>
+              <div class="stat-note"><b>↑ 3%</b> this week</div>
+            </div>
+            <div class="stat-tile amber">
+              <div class="stat-label">Classes This Month</div>
+              <div class="stat-value text-amber">14</div>
+              <div class="stat-note">Next: <b style="color:var(--amber)">Today 4 PM</b></div>
+            </div>
+            <div class="stat-tile coral">
+              <div class="stat-label">Quizzes Launched</div>
+              <div class="stat-value text-coral">9</div>
+              <div class="stat-note">Avg score <b style="color:var(--coral)">74%</b></div>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- Upcoming classes -->
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Upcoming Classes</div>
+                <button class="btn btn-ghost btn-sm" onclick="openModal('schedModal')">+ New</button>
+              </div>
+              <div style="padding:8px 20px">
+                <div class="sched-item">
+                  <div class="sched-dot" style="background:var(--sky)"></div>
+                  <div class="sched-info">
+                    <div class="sched-name">Calculus — Derivatives</div>
+                    <div class="sched-time">Today · 4:00 PM · 60 min · 📐 Maths</div>
+                  </div>
+                  <button class="btn btn-primary btn-sm" onclick="showPage('live');startClass()">Start</button>
+                </div>
+                <div class="sched-item">
+                  <div class="sched-dot" style="background:var(--violet)"></div>
+                  <div class="sched-info">
+                    <div class="sched-name">Waves &amp; Oscillations</div>
+                    <div class="sched-time">Tomorrow · 3:30 PM · 45 min · 🔬 Physics</div>
+                  </div>
+                  <span class="badge badge-amber">Soon</span>
+                </div>
+                <div class="sched-item">
+                  <div class="sched-dot" style="background:var(--jade)"></div>
+                  <div class="sched-info">
+                    <div class="sched-name">Essay Writing Workshop</div>
+                    <div class="sched-time">Thu · 5:00 PM · 50 min · 📖 English</div>
+                  </div>
+                  <span class="badge badge-jade">Ready</span>
+                </div>
+                <div class="sched-item">
+                  <div class="sched-dot" style="background:var(--amber)"></div>
+                  <div class="sched-info">
+                    <div class="sched-name">Chemical Reactions</div>
+                    <div class="sched-time">Fri · 2:00 PM · 55 min · 🧪 Science</div>
+                  </div>
+                  <span class="badge badge-jade">Ready</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Attendance snapshot -->
+            <div class="card">
+              <div class="card-head">
+                <div class="card-title">Attendance Snapshot</div>
+                <button class="btn btn-ghost btn-sm" onclick="showPage('att')">See All →</button>
+              </div>
+              <div id="dashAttList" style="padding:8px 0"></div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ LIVE CLASS ══ -->
+      <div class="page" id="page-live" style="position:relative">
+
+        <!-- Quiz overlay -->
+        <div class="quiz-overlay" id="quizOverlay">
+          <div class="quiz-box" id="quizBox"></div>
+        </div>
+
+        <div class="live-layout" style="flex:1;overflow:hidden">
+
+          <!-- Video section -->
+          <div class="video-section">
+            <div class="video-grid g-4" id="videoGrid"></div>
+
+            <!-- Pre-live screen -->
+            <div class="start-screen" id="startScreen">
+              <div class="icon">📡</div>
+              <h2>Ready to go live?</h2>
+              <p>Your students are waiting. Click below to start the class and let students join.</p>
+              <div class="actions">
+                <button class="btn btn-danger btn-lg" onclick="startClass()">📡 Start Live Class</button>
+                <button class="btn btn-ghost" onclick="openModal('schedModal')">📅 Schedule Instead</button>
+              </div>
+            </div>
+
+            <!-- Controls bar (shown when live) -->
+            <div class="controls-bar" id="controlsBar" style="display:none">
+              <button class="ctrl-btn on" id="micCtrl" onclick="toggleCtrl('micCtrl','🎤','🔇')">
+                🎤<span class="tip">Mute mic</span>
+              </button>
+              <button class="ctrl-btn on" id="camCtrl" onclick="toggleCtrl('camCtrl','📷','🚫')">
+                📷<span class="tip">Stop camera</span>
+              </button>
+              <button class="ctrl-btn on" onclick="shareScreen()">
+                🖥️<span class="tip">Share screen</span>
+              </button>
+              <div class="ctrl-sep"></div>
+              <button class="ctrl-btn on" onclick="launchQuiz()">
+                🧠<span class="tip">Launch Quiz</span>
+              </button>
+              <button class="ctrl-btn on" onclick="launchPoll()">
+                📊<span class="tip">Quick Poll</span>
+              </button>
+              <button class="ctrl-btn on" onclick="showPage('att')">
+                ✅<span class="tip">Mark Attendance</span>
+              </button>
+              <div class="ctrl-sep"></div>
+              <button class="ctrl-btn on" onclick="toggleLayout()">
+                ⊞<span class="tip">Change layout</span>
+              </button>
+              <button class="ctrl-btn on">
+                🔗<span class="tip">Copy invite link</span>
+              </button>
+              <div class="ctrl-sep"></div>
+              <button class="ctrl-btn end" onclick="endClass()">
+                ⏹<span class="tip">End class</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Right panel -->
+          <div class="right-panel">
+            <div class="panel-tabs">
+              <button class="panel-tab active" onclick="switchPanel(this,'chatPanel')">💬 Chat</button>
+              <button class="panel-tab" onclick="switchPanel(this,'rosterPanel')">👥 Students</button>
+              <button class="panel-tab" onclick="switchPanel(this,'notesPanel')">📝 Notes</button>
+            </div>
+
+            <!-- Chat -->
+            <div id="chatPanel" style="display:flex;flex-direction:column;height:calc(100% - 44px)">
+              <div class="chat-feed" id="chatFeed"></div>
+              <div class="chat-input-row">
+                <input class="chat-inp" id="teacherChatInp" placeholder="Message students…" onkeydown="handleChatKey(event)">
+                <button class="send-btn" onclick="sendMessage()">↑</button>
+              </div>
+            </div>
+
+            <!-- Roster -->
+            <div id="rosterPanel" class="panel-body" style="display:none">
+              <div id="rosterList"></div>
+            </div>
+
+            <!-- Notes -->
+            <div id="notesPanel" class="panel-body" style="display:none;padding:14px">
+              <textarea style="width:100%;height:95%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;color:var(--text);font-size:0.82rem;resize:none;outline:none;min-height:280px" placeholder="Take notes during class…"></textarea>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ══ QUIZ BUILDER ══ -->
+      <div class="page" id="page-quiz">
+        <div class="page-scroll">
+          <div class="section-header mb-lg">
+            <div>
+              <div class="section-title">Quiz Builder</div>
+              <div class="section-sub">Create, manage and launch quizzes</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost">📥 Import</button>
+              <button class="btn btn-primary" onclick="openModal('quizModal')">+ Create Quiz</button>
+            </div>
+          </div>
+          <div class="grid-3" id="quizCardGrid"></div>
+        </div>
+      </div>
+
+      <!-- ══ ATTENDANCE ══ -->
+      <div class="page" id="page-att">
+        <div class="page-scroll">
+          <div class="section-header mb-lg">
+            <div>
+              <div class="section-title">Attendance Tracker</div>
+              <div class="section-sub">All-time records for your 30 students</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost">📥 Export CSV</button>
+              <button class="btn btn-jade">✅ Mark Today</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Student</th>
+                  <th>Subjects</th>
+                  <th>Classes Attended</th>
+                  <th>Attendance %</th>
+                  <th>Trend</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="attTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ STUDENTS ══ -->
+      <div class="page" id="page-students">
+        <div class="page-scroll">
+          <div class="section-header mb-lg">
+            <div>
+              <div class="section-title">My Students</div>
+              <div class="section-sub">30 enrolled students</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost">📥 Import CSV</button>
+              <button class="btn btn-primary">+ Add Student</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Student</th>
+                  <th>Student ID</th>
+                  <th>Subjects</th>
+                  <th>Attendance</th>
+                  <th>Avg Score</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="studentsTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /content-area -->
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+<!-- ═══════════ MODALS ═══════════ -->
+
+<!-- Schedule class -->
+<div class="modal-overlay" id="schedModal">
+  <div class="modal">
+    <h2>📅 Schedule a Class</h2>
+    <div class="field"><label>Class Title</label><input type="text" placeholder="e.g. Calculus — Derivatives"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Subject</label>
+        <select>
+          <option>📐 Mathematics</option>
+          <option>🔬 Physics</option>
+          <option>📖 English Literature</option>
+          <option>🧪 Science</option>
+        </select>
+      </div>
+      <div class="field"><label>Duration (mins)</label><input type="number" value="60"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Date</label><input type="date"></div>
+      <div class="field"><label>Time</label><input type="time" value="16:00"></div>
+    </div>
+    <div class="field"><label>Agenda / Notes</label><textarea placeholder="What will be covered in this class?"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('schedModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="closeModal('schedModal')">Schedule ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Create quiz -->
+<div class="modal-overlay" id="quizModal">
+  <div class="modal">
+    <h2>🧠 Create Quiz</h2>
+    <div class="field"><label>Quiz Title</label><input type="text" placeholder="e.g. Derivatives Practice #4"></div>
+    <div class="field-row">
+      <div class="field">
+        <label>Subject</label>
+        <select>
+          <option>📐 Mathematics</option><option>🔬 Physics</option>
+          <option>📖 English</option><option>🧪 Science</option>
+        </select>
+      </div>
+      <div class="field"><label>Timer per Q (sec)</label><input type="number" value="30"></div>
+    </div>
+    <div class="field"><label>Question 1</label><input type="text" placeholder="Type your question here…"></div>
+    <div class="field-row">
+      <div class="field"><label>Option A</label><input type="text" placeholder="Option A"></div>
+      <div class="field"><label>Option B</label><input type="text" placeholder="Option B"></div>
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Option C</label><input type="text" placeholder="Option C"></div>
+      <div class="field"><label>Option D</label><input type="text" placeholder="Option D"></div>
+    </div>
+    <div class="field">
+      <label>Correct Answer</label>
+      <select><option>A</option><option>B</option><option>C</option><option>D</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('quizModal')">Cancel</button>
+      <button class="btn btn-ghost">+ Add Question</button>
+      <button class="btn btn-primary" onclick="closeModal('quizModal')">Save Quiz ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- Scripts — order matters: data → quiz → teacher -->
+<script src="data.js"></script>
+<script src="quiz.js"></script>
+<script src="teacher.js"></script>
+
+</body>
+</html>
