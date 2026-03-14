@@ -7,8 +7,8 @@
    STEP 4: Paste them below replacing the placeholder text
    ============================================================ */
 
-const SUPABASE_URL  = 'https://idjdmaxqqchobtzmjiuk.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_rcow4N5e39cJo5vNR0eyIg_ciI5Gg5V';
+const SUPABASE_URL  = 'https://hmulyswrteqktahxxuio.supabase.co';
+const SUPABASE_ANON = 'sb_publishable_WWOhyOSFjFfc1MB-60-iSw_Gmnln8zy';
 
 /* ── Supabase client (loaded from CDN in HTML) ── */
 const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
